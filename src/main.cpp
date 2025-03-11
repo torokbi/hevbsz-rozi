@@ -69,7 +69,7 @@ void routeRead(){
                     lcd.setCursor(13,1);
                     if (String(timer).length() == 3) lcd.print(String(timer));
                     else if(String(timer).length() == 2) lcd.print('0' + String(timer));
-                    else lcd.print('00' + String(timer));
+                    else lcd.print("00" + String(timer));
                     break;
                   case 3: soundName = String(token); break;
                   case 4: stationCode = String(token); break;
@@ -111,7 +111,6 @@ void loop () {
     break;
   
   case 3:
-    //Serial.println("itt vagyok");
     if (timer != 0){
       currenttime = millis();
       if (currenttime - secondstarttime > 1000) {
@@ -120,7 +119,7 @@ void loop () {
         lcd.setCursor(13,1);
         if (String(timer).length() == 3) lcd.print(String(timer));
         else if(String(timer).length() == 2) lcd.print('0' + String(timer));
-        else lcd.print('00' + String(timer));
+        else lcd.print("00" + String(timer));
         Serial.println(timer);
       }
     }
