@@ -1,9 +1,9 @@
-from machine import SPI, Pin, I2C
+from machine import SPI, Pin, I2C, PWM
 import sdcard, uos
 from time import ticks_ms
 from lcd_api import LcdApi
 from pico_i2c_lcd import I2cLcd
-from time import sleep
+from time import sleep, sleep_us
 
 
 spi = SPI(1,sck=Pin(14), mosi=Pin(15), miso=Pin(12))
@@ -14,6 +14,10 @@ cruseSignal = Pin(9, Pin.IN, Pin.PULL_UP)
 secondSart = 0
 i2c = I2C(0, sda=Pin(0), scl=Pin(1), freq=400000)
 lcd = I2cLcd(i2c, 0x27, 2, 16)  
+
+pwm = PWM(Pin(2))  # GP0
+pwm.freq(8000)     # mintavételi frekvencia
+pwm.duty_u16(0) 
 
 mode = 1
 routeName = "test"
@@ -37,7 +41,6 @@ except OSError:
     lcd.putstr("Sdcard not found")
     while True:
         pass
-#print(uos.listdir('/data/sounds'))
 
 
 """
@@ -96,6 +99,21 @@ while True:
                 lcd.putstr(numconverter(routeEvent["timer"]))
             else: mode = 4
     if mode == 4:
+        with open(f"/data/sounds/{routeEvent['soundName']}.wav", "rb") as f:
+        # WAV fejléc átugrás (44 bájt)
+            f.read(44)
+            
+            while True:
+                sample = f.read(1)
+                if not sample:
+                    break
+
+                value = int.from_bytes(sample, 'little')  # 8-bit unsigned
+                pwm.duty_u16(value * 257)  # skálázás 0-65535-re (256*257≈65536)
+
+                sleep_us(125)  # 8000 Hz = 125 μs per minta
+
+        pwm.duty_u16(0)
         mode = 1
 
     lcd.move_to(8,1)
